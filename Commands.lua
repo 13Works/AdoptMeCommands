@@ -1294,7 +1294,7 @@ function Say(Message: string, IsSystemMessage: boolean)
 end
 
 local Connection = TextChatService.MessageReceived:Connect(function(Message: TextChatMessage)
-	if not Message or not Message.TextSource then error("Error processing message. Got:", Message) end
+	if not Message or not Message.TextSource then error("Error processing message. Got:".. typeof(Message)) end
 	local Sender = Players:GetPlayerByUserId(Message.TextSource.UserId)
 
 	if Accounts[Sender.Name] then
