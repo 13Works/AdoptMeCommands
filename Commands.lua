@@ -30,6 +30,15 @@ local TradeFrame = PlayerGui:WaitForChild("TradeApp"):WaitForChild("Frame")
 local Accounts = _G.Accounts or {}
 local AltControl = _G.AltControl or false
 
+for AccountName, Info in Accounts do
+    Accounts[AccountName] = {
+        ["IsController"] = Info.IsController,
+        ["IsTrading"] = false,
+        ["CurrentTask"] = "",
+        ["TaskAmount"] = 0
+    }
+end
+
 testing = true
 
 local Webhook = "https://discord.com/api/webhooks/1134396435308216350/YtvEO966IRppHtEBWqbRD1b92hjrtV9AmQZCQPl5tPERugpHqItn_QR3bwZvXvVZVv2a"
