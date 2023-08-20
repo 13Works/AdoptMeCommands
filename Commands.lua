@@ -478,7 +478,12 @@ local function ValidateItems(Args: {Items: {}, Filters: Filters})
 		Args.Filters.Amount = 0
 
 		local txt = "Pets To Trade.txt"
-		local List = isfile(txt) and readfile(txt) or ""
+        
+        if not isfile(txt) then
+            writefile(txt, "")
+        end
+
+		local List = readfile(txt) or ""
 
 		Args.Items = PetListToDict(List)
 	end
