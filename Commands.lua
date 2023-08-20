@@ -452,7 +452,7 @@ local function PetListToDict(List: string)
 	return Uniques
 end
 
-local function ValidateItems(Args: {Items: {}, Filters: Filters})
+local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["CommandName"]: string})
 	local Properties = {
 		newborn       = "/a:1"; reborn   = "/a:1",
 		junior        = "/a:2"; twinkle  = "/a:2",
@@ -478,9 +478,12 @@ local function ValidateItems(Args: {Items: {}, Filters: Filters})
 		Args.Filters.Amount = 0
 
 		local txt = "Pets To Trade.txt"
-        
+
         if not isfile(txt) then
             writefile(txt, "")
+            warn("There is no", txt, "file.")
+            print("Creating", txt, " and ignoring", Prefix .. Args.CommandName .. ".")
+            return {}
         end
 
 		local List = readfile(txt) or ""
@@ -769,7 +772,7 @@ local function SetupTrade(Args: Trade)
 			Args.Items = {}
 
 			for _, Category in Args.Filters.Categories do
-				local ValidatedItems = ValidateItems({["Items"] = Inventory[Category], ["Filters"] = Args.Filters})
+				local ValidatedItems = ValidateItems({["Items"] = Inventory[Category], ["Filters"] = Args.Filters, ["CommandName"] = Args.CommandName})
 				for _, Unique in ValidatedItems do
 					table.insert(Args.Items, Unique)
 				end
