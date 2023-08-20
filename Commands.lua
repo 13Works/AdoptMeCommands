@@ -2,6 +2,7 @@ request        = request        or function(...) warn("[no function 'request']")
 getconnections = getconnections or function(...) warn("[no function 'getconnections']") end
 isfile         = isfile         or function(...) warn("[no function 'isfile']") end
 readfile       = readfile       or function(...) warn("[no function 'readfile']") end
+writefile      = writefile      or function(...) warn("[no function 'writefile']") end
 getupvalue     = getupvalue     or function(...) warn("[no function 'getupvalue']") end
 
 type DialogObject = {["Text"]: string; ["Dialog"]: GuiObject; ["Buttons"]: {[string]: GuiButton}}
@@ -31,12 +32,12 @@ local Accounts = _G.Accounts or {}
 local AltControl = _G.AltControl or false
 
 for AccountName, Info in Accounts do
-    Accounts[AccountName] = {
-        ["IsController"] = Info.IsController,
-        ["IsTrading"] = false,
-        ["CurrentTask"] = "",
-        ["TaskAmount"] = 0
-    }
+	Accounts[AccountName] = {
+		["IsController"] = Info.IsController,
+		["IsTrading"] = false,
+		["CurrentTask"] = "",
+		["TaskAmount"] = 0
+	}
 end
 
 testing = true
@@ -479,12 +480,12 @@ local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["Comma
 
 		local txt = "Pets To Trade.txt"
 
-        if not isfile(txt) then
-            writefile(txt, "")
-            warn("There is no", txt, "file.")
-            print("Creating", txt, " and ignoring", Prefix .. Args.CommandName .. ".")
-            return {}
-        end
+		if not isfile(txt) then
+			writefile(txt, "")
+			warn("There is no", txt, "file.")
+			print("Creating", txt, " and ignoring", Prefix .. Args.CommandName .. ".")
+			return {}
+		end
 
 		local List = readfile(txt) or ""
 
@@ -574,10 +575,12 @@ local function TradeTarget(Args: {["Giver"]: Player; ["Reciever"]: Player; ["Ite
 		for j = i, math.min(i + MaxTradeSize - 1, TotalItems) do
 			table.insert(Offer, Args.Items[j])
 		end
-
+		
+		if #Offer == 0 then warn("No items to trade") break end
+		
 		warn("Trading", #Offer, "items to", Args.Reciever.Name ..".")
 		print("Items remaining:", TotalItems - #Offer - i + 1)
-
+		
 		repeat 
 			task.wait(1)
 			local DialogObject = GetDialogObject()
@@ -590,7 +593,7 @@ local function TradeTarget(Args: {["Giver"]: Player; ["Reciever"]: Player; ["Ite
 		local CurrentDialogObject = GetDialogObject(true)
 		local Accept = CurrentDialogObject.Buttons.Accept
 		if Accept then Click(Accept) end
-		
+
 		repeat 
 			print("Checking if it's your first tiem trading."); task.wait(1) 
 			local DialogObject = GetDialogObject(true)
@@ -628,7 +631,7 @@ local function TradeTarget(Args: {["Giver"]: Player; ["Reciever"]: Player; ["Ite
 		task.wait(1)
 
 		local Unbalanced = false
-		
+
 		repeat 
 			print("Checking for unbalance."); task.wait(1) 
 			local DialogObject = GetDialogObject(true)
@@ -648,7 +651,7 @@ local function TradeTarget(Args: {["Giver"]: Player; ["Reciever"]: Player; ["Ite
 		until not DialogObject.Dialog.Visible or not Unbalanced
 
 		task.wait(1)
-		
+
 		repeat 
 			task.wait(1) 
 			local DialogObject = GetDialogObject(true)
@@ -665,7 +668,7 @@ local function TradeTarget(Args: {["Giver"]: Player; ["Reciever"]: Player; ["Ite
 		until not DialogObject.Dialog.Visible or not Unbalanced
 
 		task.wait(1)
-		
+
 		repeat 
 			print("Waiting for target to confirm offer...")
 			API:WaitForChild("TradeAPI/ConfirmTrade"):FireServer()
@@ -765,7 +768,7 @@ local function SetupTrade(Args: Trade)
 		UpdateStatus(LocalPlayer)
 	elseif LocalPlayer == Args.Giver then
 		Args.Items = Args.Items and Args.Items[Args.Reciever.Name] or nil
-		
+
 		if Args.Filters and not Args.Items then 
 			print("Trading every", Concat(Args.Filters.Properties or Args.Filters.Names, " & "), "to", Args.Reciever.Name)
 			local Inventory = GetInventory()
@@ -801,9 +804,9 @@ local function SetupMultipleTrades(Args: Trade)
 		repeat task.wait(1); print("Waiting for turn...") until GetCurrentTask(LocalPlayer, "IsTrading") or GetCurrentTask(Args.Sender, "CurrentTask") == "" or (IsSender and GetCurrentTask(Args.Sender, "IsTrading") == false)
 
 		if GetCurrentTask(Target, "IsTrading") and GetCurrentTask(Args.Sender, "CurrentTask") ~= "" and (LocalPlayer == Target or IsSender) then
-			
+
 			print("Giver:", Args.Giver, "| Reciever:", Target)
-			
+
 			SetupTrade({
 				["Reciever"] = Args.Reciever or Target, 
 				["Giver"] = Args.Giver or Target, 
@@ -1178,7 +1181,7 @@ Commands["inventory"] = function(Args: StandardArgs) -- Send inventory through w
 	InventoryEmbed.description = FormatInventoryToString(Items)
 	InventoryEmbed.type = "rich"
 	InventoryEmbed.color = 1974050
-	
+
 	local ProccessEmbeds = game:GetService("HttpService"):JSONEncode({["embeds"] = {InventoryEmbed}})
 
 	request({
