@@ -569,14 +569,16 @@ local function PetListToDict(List)
 
             local FoundPet = true
 
-            for Property, Value in PetProperties do
-                if Info.properties[Property] == nil then
-                    FoundPet = false
-                    continue
-                end
-                if Info.properties[Property] ~= Value then
-                    FoundPet = false
-                    continue
+            if next(PetProperties) ~= nil then
+                for Property, Value in PetProperties do
+                    if Info.properties[Property] == nil then
+                        FoundPet = false
+                        continue
+                    end
+                    if Info.properties[Property] ~= Value then
+                        FoundPet = false
+                        continue
+                    end
                 end
             end
 
