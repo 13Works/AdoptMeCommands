@@ -570,8 +570,6 @@ local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["Comma
 		local List = readfile(txt) or ""
 		local Pets = GetPetsFromList(List)
 		Args.Items = Pets
-		if Pets.ListType == "[alt list]" then Args.Items = Pets[LocalPlayer.Name] or {} end
-		Args.ListType = nil
 	end
 
 	local TargetNames = Args.Filters.Names
@@ -1139,13 +1137,22 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 		local Index = 1
 
 		for _, Item in TargetItems do
+			local Target = Targets[Index]
+			
+			if TargetItems.ListType and TargetItems.ListType == "[alt list]" then
+				Inventories[Target.Name] = TargetItems[Target.Name] or {}
+				continue
+			end
+			
 			table.insert(Inventories[Targets[Index].Name], Item)
 			Index = Index == #Targets and 1 or Index + 1
 		end
 
 		print(OutputSeperator)
-		warn(#TargetItems, "items total.")
-		warn(ItemsPerInventory, "items per inventory.")
+		if TargetItems.ListType == "[pet list]" then
+			warn(#TargetItems, "items total.")
+			warn(ItemsPerInventory, "items per inventory.")
+		end
 		print(PrintTable(Inventories, "Inventories"))
 	end
 
