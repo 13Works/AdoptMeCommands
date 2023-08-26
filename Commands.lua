@@ -1134,7 +1134,7 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 			PrintTable(TargetItems, "TargetItems")
 		end
 
-		if next(TargetItems) == nil then return end
+		if TargetItems.ListType ~= "[alt list]" and next(TargetItems) == nil then return end
 		
 		local ItemsPerInventory = #TargetItems / #Targets
 		local Index = 1
