@@ -528,6 +528,7 @@ local function GetPetsFromList(List: string)
 		return {}
 	end
 
+	warn(ListType)
 	FoundPets.ListType = ListType
 
 	return FoundPets
@@ -1131,7 +1132,7 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 		for _, Category in Filters.Categories do
 			if not Inventory[Category] then continue end
 			TargetItems = ValidateItems({["Items"] = Inventory[Category], ["Filters"] = Filters})
-			PrintTable(TargetItems, "TargetItems")
+			print(PrintTable(TargetItems, "TargetItems"))
 		end
 
 		if TargetItems.ListType ~= "[alt list]" and next(TargetItems) == nil then return end
