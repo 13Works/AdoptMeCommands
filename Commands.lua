@@ -1153,12 +1153,11 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 			local Target = Targets[Index]
 
 			if TargetItems.ListType == "[alt list]" then
-				Inventories[Target.Name] = Item or {}
-				Index = Index == #Targets and 1 or Index + 1
-				continue
+				Inventories[Target.Name] = TargetItems[Target.Name] or {}
+			elseif TargetItems.ListType == "[pet list]" then
+				table.insert(Inventories[Targets[Index].Name], Item)
 			end
-
-			table.insert(Inventories[Targets[Index].Name], Item)
+			
 			Index = Index == #Targets and 1 or Index + 1
 		end
 
