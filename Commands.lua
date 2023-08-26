@@ -344,7 +344,9 @@ local function GetKind(Input: string, Source: {{["name"]: string}})
 	end
 
 	local function FindSingleSegment(InputSegment, PetName)
-		if InputSegment:lower() == PetName:lower() or string.find(PetName, InputSegment) then
+		local PetNameSegments = PetName:split(" ")
+
+		if #PetNameSegments > 1 and table.find(PetNameSegments, InputSegment) then
 			--warn(InputSegment, "=", PetName, "| true")
 			return 1
 		end
@@ -359,11 +361,11 @@ local function GetKind(Input: string, Source: {{["name"]: string}})
 
 	for _, Info in Source do
 		local TotalSegmentsMatched = 0
-		local PetName = string.lower(Info.name)
-		if PetName == string.lower(Input) then return Info.kind, PetName end
+		local PetName = Info.name:lower()
+		if PetName == Input:lower() then return Info.kind, PetName end
 
 		for _, InputSegment in ipairs(InputSegments) do
-			InputSegment = Strip(string.lower(InputSegment))
+			InputSegment = Strip(InputSegment):lower()
 			TotalSegmentsMatched += #InputSegments > 1 and FindMultipleSegments(InputSegment, PetName) or FindSingleSegment(InputSegment, PetName)
 		end
 
@@ -476,7 +478,7 @@ local function PhrasePetLines(Lines: {string}, ListType: "[pet list]" | "[alt li
 
 			if ListType == "[alt list]" then
 				local Duplicate = false
-				warn("Current Uniques:", CurrentUniques)
+				-- warn("Current Uniques:", CurrentUniques)
 				for i, Items in CurrentUniques or {} do
 					if Items[Unique] or table.find(Items, Unique) then
 						Duplicate = true
