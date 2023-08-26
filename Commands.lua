@@ -304,7 +304,7 @@ local function GetIdentities(Items)
 	local Uniques = {}
 
 	for Unique, Info in next, Items do
-		if Unique == "ListType" then continue end
+		if Unique == "ListType" or not Info.kind then continue end
 		local Properties = Info.properties
 		-- 'k:/a:/n/m/f/r'
 		local Identifiers = {
@@ -344,7 +344,7 @@ local function GetKind(Input: string, Source: {{["name"]: string}})
 	end
 
 	local function FindSingleSegment(InputSegment, PetName)
-		if InputSegment:lower() == PetName:lower() or string.find(PetName, InputSegment) then
+		if InputSegment:lower() == PetName:lower() or PetName:find(InputSegment) or table.find(PetName:split("-"), InputSegment) then
 			--warn(InputSegment, "=", PetName, "| true")
 			return 1
 		end
@@ -1138,12 +1138,12 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 
 		for _, Item in TargetItems do
 			local Target = Targets[Index]
-			
+
 			if TargetItems.ListType and TargetItems.ListType == "[alt list]" then
 				Inventories[Target.Name] = TargetItems[Target.Name] or {}
 				continue
 			end
-			
+
 			table.insert(Inventories[Targets[Index].Name], Item)
 			Index = Index == #Targets and 1 or Index + 1
 		end
