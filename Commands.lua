@@ -9,7 +9,7 @@ type DialogObject = {["Text"]: string; ["Dialog"]: GuiObject; ["Buttons"]: {[str
 type Filters = {["Categories"]: {string}; ["Properties"]: {string}; ["Names"]: {string}; ["Amount"]: number}
 type StandardArgs = {["Sender"]: Player; ["CommandName"]: string; ["Ignored"]: string}
 type Status = {["CurrentTask"]: string; ["IsTrading"]: boolean; ["TaskAmount"]: number}
-type Trade = {["Targets"]: {Player}; ["Sender"]: Player; ["Giver"]: Player; ["Reciever"]: Player; ["Filters"]: Filters; ["Items"]: {[string]: {}}}
+type Trade = {["Targets"]: {Player}; ["Sender"]: Player; ["Giver"]: Player; ["Reciever"]: Player; ["Filters"]: Filters; ["Items"]: {[string]: {}}; ["ListType"]: "[alt list]" | "[pet list]"}
 type DiscordEmbed = {["title"]: string; ["description"]: string; ["type"]: "rich" | "standard"; ["color"]: number}
 
 repeat wait() until game:IsLoaded()
@@ -899,7 +899,9 @@ local function SetupMultipleTrades(Args: Trade)
 		if GetCurrentTask(Target, "IsTrading") and GetCurrentTask(Args.Sender, "CurrentTask") ~= "" and (LocalPlayer == Target or IsSender) then
 
 			print("Giver:", Args.Giver, "| Reciever:", Target)
-
+			
+			Args.Items = Args.ListType == "[alt list]" and Args.Items[Args.Reciever] or Args.Items
+			
 			SetupTrade({
 				["Reciever"] = Args.Reciever or Target, 
 				["Giver"] = Args.Giver or Target, 
@@ -1172,7 +1174,8 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 	Trade.Targets = Targets
 	Trade.Giver = Args.Sender
 	Trade.Sender = Args.Sender
-
+	Trade.ListType = TargetItems.ListType
+	
 	if MultipleTargets then
 		Trade.Items = Inventories
 		SetupMultipleTrades(Trade)
