@@ -404,7 +404,7 @@ function MatchProperties(a: {}, b: {})
 	return true
 end
 
-local function PhrasePetLines(Lines: {string}, ListType: "[pet list]" | "[alt list]")
+local function PhrasePetLines(Lines: {string}, ListType: "[pet list]" | "[alt list]", CurrentUniques)
 	local ValidProperties = {
 		["n"] = "neon",
 		["m"] = "mega_neon",
@@ -472,8 +472,22 @@ local function PhrasePetLines(Lines: {string}, ListType: "[pet list]" | "[alt li
 		for Unique, Info in Inventory do
 			if table.find(InvalidKinds, Info.kind) then continue end
 			if TargetKind ~= Info.kind then table.insert(InvalidKinds, Info.kind) continue end 
-			if next(PetProperties) ~= nil and not MatchProperties(Info.properties, PetProperties) then continue end
 			if table.find(FoundUniques, Unique) then warn("Attempted to insert duplicate pet.") continue end
+
+			if ListType == "[alt list]" then
+				local Duplicate = false
+				warn("Current Uniques:", CurrentUniques)
+				for i, Items in CurrentUniques or {} do
+					if Items[Unique] or table.find(Items, Unique) then
+						Duplicate = true
+						break
+					end
+				end
+
+				if Duplicate then warn("Attempted to insert duplicate pet.") continue end
+			end
+
+			if next(PetProperties) ~= nil and not MatchProperties(Info.properties, PetProperties) then continue end
 
 			warn(TargetKind,"=", Info.kind, "| true") 
 
@@ -514,7 +528,7 @@ local function GetPetsFromList(List: string)
 			local AccountName, Pets = Line[1], Line[2]
 			if not AccountName or not Pets then warn("Invalid line: AccountName:", AccountName, "| Pets:", Pets) continue end
 			warn(AccountName, Pets)
-			FoundPets[Strip(AccountName):lower()] = PhrasePetLines(Pets:gsub(";", ","):gsub(",", "\n"):split("\n"), ListType)
+			FoundPets[Strip(AccountName):lower()] = PhrasePetLines(Pets:gsub(";", ","):gsub(",", "\n"):split("\n"), ListType, FoundPets)
 		end
 	elseif ListType == "[pet list]" then
 		FoundPets = PhrasePetLines(List:gsub(";", ""):gsub(",", ""):split("\n"), ListType)
