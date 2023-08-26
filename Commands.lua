@@ -619,7 +619,7 @@ local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["Comma
 		return TargetUniques
 	end
 
-	print("Getting identities:", Args.Items)
+	print("Getting identities:", Args.Items, "| ListType:", Args.Items.ListType)
 	local Uniques = {}
 	local ListType = Args.Items.ListType or ""
 	if ListType == "[alt list]" then
