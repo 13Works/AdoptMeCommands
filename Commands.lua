@@ -630,7 +630,9 @@ local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["Comma
 	elseif ListType == "[pet list]" then
 		Uniques = ItemsToUniques(Args.Items)
 	end
-
+	
+	Uniques.ListType = Args.Items.ListType
+	
 	return Uniques
 end
 
