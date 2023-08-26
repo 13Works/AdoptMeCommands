@@ -1130,7 +1130,7 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 	local Inventories, TargetItems = {}, {}
 
 	for i = 1, #Targets do
-		Inventories[Targets[i].Name] = {}
+		Inventories[Targets[i].Name:lower()] = {}
 	end
 
 	if IsSender then
@@ -1149,11 +1149,8 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 
 		for i, Item in TargetItems do
 			if i == "ListType" then continue end
-			
-			local Target = Targets[Index]
-
 			if TargetItems.ListType == "[alt list]" then
-				Inventories[Target.Name] = TargetItems[Target.Name] or {}
+				Inventories[i] = Item or {}
 			elseif TargetItems.ListType == "[pet list]" then
 				table.insert(Inventories[Targets[Index].Name], Item)
 			end
