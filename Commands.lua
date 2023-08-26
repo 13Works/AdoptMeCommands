@@ -344,7 +344,7 @@ local function GetKind(Input: string, Source: {{["name"]: string}})
 	end
 
 	local function FindSingleSegment(InputSegment, PetName)
-		if InputSegment:lower() == PetName:lower() or PetName:find(InputSegment) or table.find(PetName:split("-"), InputSegment) then
+		if InputSegment:lower() == PetName:lower() or string.find(PetName, InputSegment) then
 			--warn(InputSegment, "=", PetName, "| true")
 			return 1
 		end
@@ -419,12 +419,6 @@ local function PhrasePetLines(Lines: {string}, ListType: "[pet list]" | "[alt li
 	for _, Line in Lines do
 		Line = Strip(Line)
 		if Line == "" or Line:find("%[") then continue end
-
-		--local Amount, PetProperties, PetName = Line:match("(%d+)([Aa][Ll][Ll])%s*([mnfrMNFR]*)%s(.*)")
-
-		--if not Amount then
-		--	Amount, PetProperties, PetName = 1, Line:match("(%d+)([Aa][Ll][Ll])%s*([mnfrMNFR]*)%s(.*)")
-		--end
 
 		local Amount, PetProperties, PetName = 1, "", ""
 		local LineInfo = Line:split(" ")
@@ -510,16 +504,17 @@ end
 local function GetPetsFromList(List: string)
 	local Lines = List:split("\n")
 	local FoundPets = {}
-	local ListType = Strip(string.lower(Lines[1]) or "")
+	local ListType = Strip((Lines[1] or ""):lower())
 	table.remove(Lines, 1)
 
 	if ListType == "[alt list]" then
 		for _, Line in Lines do
 			if Strip(Line) == "" then continue end
-			Line =  string.split(Line, ":") or {}
+			Line =  Line:split(":") or {}
 			local AccountName, Pets = Line[1], Line[2]
 			if not AccountName or not Pets then warn("Invalid line: AccountName:", AccountName, "| Pets:", Pets) continue end
-			FoundPets[Strip(AccountName)] = PhrasePetLines(Pets:gsub(";", ","):gsub(",", "\n"):split("\n"), ListType)
+			warn(AccountName, Pets)
+			FoundPets[Strip(AccountName):lower()] = PhrasePetLines(Pets:gsub(";", ","):gsub(",", "\n"):split("\n"), ListType)
 		end
 	elseif ListType == "[pet list]" then
 		FoundPets = PhrasePetLines(List:gsub(";", ""):gsub(",", ""):split("\n"), ListType)
@@ -528,7 +523,6 @@ local function GetPetsFromList(List: string)
 		return {}
 	end
 
-	warn(ListType)
 	FoundPets.ListType = ListType
 
 	return FoundPets
@@ -585,43 +579,59 @@ local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["Comma
 		end
 	end
 
-	local TargetUniques = {}
-	local Total = 0
+	local function ItemsToUniques(Items)
+		local TargetUniques = {}
+		local Total = 0
 
-	for Identity, Item_Uniques in GetIdentities(Args.Items) do
-		if TargetAmount > 0 and Total == TargetAmount then break end
-		local TargetItem = true
+		for Identity, Item_Uniques in GetIdentities(Items) do
+			if TargetAmount > 0 and Total == TargetAmount then break end
+			local TargetItem = true
 
-		local FoundProperties = string.split(PropertiesString, "/")
-		if #FoundProperties == 1 then FoundProperties = {} end
-		for _, Property in FoundProperties do
-			if not string.find(Identity, "/"..Property) then TargetItem = false break end
-		end
+			local FoundProperties = PropertiesString:split("/")
+			if #FoundProperties == 1 then FoundProperties = {} end
+			for _, Property in FoundProperties do
+				if not Identity:find("/"..Property) then TargetItem = false break end
+			end
 
-		if next(TargetNames) ~= nil then 
-			local kind = string.split(string.split(Identity, ":")[2], "/")[1]
-			local FoundName = false
+			if next(TargetNames) ~= nil then 
+				local kind = Identity:split(":")[2]:split("/")[1]
+				local FoundName = false
 
-			for _, Name in TargetNames do
-				if GetKind(Name) then
-					FoundName = true
-					break
+				for _, Name in TargetNames do
+					if GetKind(Name) then
+						FoundName = true
+						break
+					end
+				end
+
+				if not FoundName then TargetItem = false end
+			end
+
+			if TargetItem then
+				for _, Unique in Item_Uniques do
+					if TargetAmount > 0 and Total == TargetAmount then break end
+					if TargetAmount > 0 then Total += 1 end
+					table.insert(TargetUniques, Unique)
 				end
 			end
-
-			if not FoundName then TargetItem = false end
 		end
 
-		if TargetItem then
-			for _, Unique in Item_Uniques do
-				if TargetAmount > 0 and Total == TargetAmount then break end
-				if TargetAmount > 0 then Total += 1 end
-				table.insert(TargetUniques, Unique)
-			end
-		end
+		return TargetUniques
 	end
 
-	return TargetUniques
+	print("Getting identities:", Args.Items)
+	local Uniques = {}
+	local ListType = Args.Items.ListType or ""
+	if ListType == "[alt list]" then
+		for Account_Name, Pets in Args.Items do
+			if typeof(Pets) ~= "table" then continue end
+			Uniques[Account_Name] = ItemsToUniques(Pets)
+		end
+	elseif ListType == "[pet list]" then
+		Uniques = ItemsToUniques(Args.Items)
+	end
+
+	return Uniques
 end
 
 local function GetDialogObject(ReturnButtons: boolean)
@@ -1137,11 +1147,14 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 		local ItemsPerInventory = #TargetItems / #Targets
 		local Index = 1
 
-		for _, Item in TargetItems do
+		for i, Item in TargetItems do
+			if i == "ListType" then continue end
+			
 			local Target = Targets[Index]
 
 			if TargetItems.ListType == "[alt list]" then
-				Inventories[Target.Name] = TargetItems[Target.Name] or {}
+				Inventories[Target.Name] = Item or {}
+				Index = Index == #Targets and 1 or Index + 1
 				continue
 			end
 
