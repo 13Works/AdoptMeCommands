@@ -661,6 +661,7 @@ local function TradeTarget(Args: {["Giver"]: Player; ["Reciever"]: Player; ["Ite
 	local MaxTradeSize = 18
 	local TotalItems = #(Args.Items or {})
 	warn("Getting offer...")
+	print(PrintTable(Args.Items, "Items"))
 
 	for i = 1, TotalItems, MaxTradeSize do
 		local Offer = {}
