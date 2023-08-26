@@ -571,9 +571,6 @@ local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["Comma
 		local List = readfile(txt) or ""
 		local Pets = GetPetsFromList(List)
 		Args.Items = Pets
-		if Args.Target and Pets.ListType == "[alt list]" then
-			Args.Items = Args.Items[Args.Target.Name:lower()]
-		end
 	end
 
 	local TargetNames = Args.Filters.Names
