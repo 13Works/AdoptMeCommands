@@ -860,6 +860,8 @@ local function SetupTrade(Args: Trade)
 
 		UpdateStatus(LocalPlayer)
 	elseif LocalPlayer == Args.Giver then
+		Args.Items = Args.Items or {}
+		
 		if Args.Filters and not Args.Items then 
 			print("Trading every", Concat(Args.Filters.Properties or Args.Filters.Names, " & "), "to", Args.Reciever.Name)
 			local Inventory = GetInventory()
@@ -878,7 +880,7 @@ local function SetupTrade(Args: Trade)
 		end
 
 		print("Getting items...")
-		print(PrintTable(Args.Items, "Items"))
+		print(PrintTable(Args.Items or {}, "Items"))
 		
 		UpdateStatus(LocalPlayer, {["IsTrading"] = true})
 		TradeTarget(Args)
