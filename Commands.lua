@@ -48,7 +48,7 @@ local OutputSeperator = "______________________________________"
 local ArgumentSeperators = {Opening = "{", Closing = "}"}
 local Prefix = "!"
 
-local Queue: {[string]: Status} = {}
+-- local Queue = loadstring(game:HttpGet("https://raw.githubusercontent.com/13Works/AdoptMeCommands/main/Queue.lua"))()
 
 function Click(Button: GuiButton)
 	assert(
@@ -570,6 +570,9 @@ local function ValidateItems(Args: {["Items"]: {}; ["Filters"]: Filters; ["Comma
 		local List = readfile(txt) or ""
 		local Pets = GetPetsFromList(List)
 		Args.Items = Pets
+		if Args.Target and Pets.ListType == "[alt list]" then
+			Args.Items = Args.Items[Args.Target.Name:lower()]
+		end
 	end
 
 	local TargetNames = Args.Filters.Names
@@ -855,7 +858,7 @@ local function SetupTrade(Args: Trade)
 			Args.Items = {}
 
 			for _, Category in Args.Filters.Categories do
-				local ValidatedItems = ValidateItems({["Items"] = Inventory[Category], ["Filters"] = Args.Filters, ["CommandName"] = Args.CommandName})
+				local ValidatedItems = ValidateItems({["Items"] = Inventory[Category], ["Filters"] = Args.Filters, ["CommandName"] = Args.CommandName, ["Target"] = Args.Reciever})
 				for _, Unique in ValidatedItems do
 					table.insert(Args.Items, Unique)
 				end
@@ -1132,14 +1135,14 @@ Commands["distribute"] = function(Args: StandardArgs) -- Distribute items to tar
 		end
 
 		if next(TargetItems) == nil then return end
-
+		
 		local ItemsPerInventory = #TargetItems / #Targets
 		local Index = 1
 
 		for _, Item in TargetItems do
 			local Target = Targets[Index]
 
-			if TargetItems.ListType and TargetItems.ListType == "[alt list]" then
+			if TargetItems.ListType == "[alt list]" then
 				Inventories[Target.Name] = TargetItems[Target.Name] or {}
 				continue
 			end
