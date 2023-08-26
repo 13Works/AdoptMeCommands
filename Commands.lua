@@ -660,8 +660,7 @@ local function TradeTarget(Args: {["Giver"]: Player; ["Reciever"]: Player; ["Ite
 
 	local MaxTradeSize = 18
 	local TotalItems = #(Args.Items or {})
-	warn("Getting offer...")
-	print(PrintTable(Args.Items, "Items"))
+	warn("Getting offer... | TotalItems:", TotalItems)
 
 	for i = 1, TotalItems, MaxTradeSize do
 		local Offer = {}
@@ -869,7 +868,7 @@ local function SetupTrade(Args: Trade)
 			Args.Items = {}
 
 			for _, Category in Args.Filters.Categories do
-				local ValidatedItems = ValidateItems({["Items"] = Inventory[Category], ["Filters"] = Args.Filters, ["CommandName"] = Args.CommandName, ["Target"] = Args.Reciever})
+				local ValidatedItems = ValidateItems({["Items"] = Inventory[Category], ["Filters"] = Args.Filters, ["CommandName"] = Args.CommandName})
 				for _, Unique in ValidatedItems do
 					table.insert(Args.Items, Unique)
 				end
@@ -880,6 +879,9 @@ local function SetupTrade(Args: Trade)
 			print(PrintTable(Args, "Set Items"))
 		end
 
+		print("Getting items...")
+		print(PrintTable(Args.Items, "Items"))
+		
 		UpdateStatus(LocalPlayer, {["IsTrading"] = true})
 		TradeTarget(Args)
 		warn("Finished trading")
@@ -903,8 +905,6 @@ local function SetupMultipleTrades(Args: Trade)
 			local Reciever = Args.Reciever or Target
 			
 			Args.Items = Args.ListType == "[alt list]" and Args.Items[Reciever.Name:lower()] or Args.Items
-			print("Getting items...")
-			print(PrintTable(Args.Items, "Items"))
 			
 			SetupTrade({
 				["Reciever"] = Reciever, 
