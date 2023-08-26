@@ -900,13 +900,14 @@ local function SetupMultipleTrades(Args: Trade)
 		if GetCurrentTask(Target, "IsTrading") and GetCurrentTask(Args.Sender, "CurrentTask") ~= "" and (LocalPlayer == Target or IsSender) then
 
 			print("Giver:", Args.Giver, "| Reciever:", Target)
+			local Reciever = Args.Reciever or Target
 			
-			Args.Items = Args.ListType == "[alt list]" and Args.Items[(Args.Reciever or Target).Name:lower()] or Args.Items
+			Args.Items = Args.ListType == "[alt list]" and Args.Items[Reciever.Name:lower()] or Args.Items
 			print("Getting items...")
 			print(PrintTable(Args.Items, "Items"))
 			
 			SetupTrade({
-				["Reciever"] = Args.Reciever or Target, 
+				["Reciever"] = Reciever, 
 				["Giver"] = Args.Giver or Target, 
 				["Filters"] = Args.Filters, 
 				["Items"] = Args.Items
