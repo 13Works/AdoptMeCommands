@@ -901,7 +901,9 @@ local function SetupMultipleTrades(Args: Trade)
 
 			print("Giver:", Args.Giver, "| Reciever:", Target)
 			
-			Args.Items = Args.ListType == "[alt list]" and Args.Items[Args.Reciever.Name] or Args.Items
+			Args.Items = Args.ListType == "[alt list]" and Args.Items[Args.Reciever.Name:lower()] or Args.Items
+			print("Getting items...")
+			print(PrintTable(Args.Items, "Items"))
 			
 			SetupTrade({
 				["Reciever"] = Args.Reciever or Target, 
